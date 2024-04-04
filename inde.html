@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="Assets/CSS/style.css">
+    <title>Reloj Digital</title>
+</head>
+
+<body>
+    <div class="elements">
+        <div class="clock">
+            <div>
+                <span id="hours">00</span>
+                <span class="time">Hours</span>
+            </div>
+            <div>
+                <span id="minutes">00</span>
+                <span class="time">Minutes</span>
+            </div>
+            <div>
+                <span id="seconds">00</span>
+                <span class="time">Seconds</span>
+            </div>
+        </div>
+
+        <form class="cities">
+            <label for="countries">Selecciona el uso horario deseado:</label>
+            <select id="countries" name="countries">
+            </select>
+        </form>
+    </div>
+
+    <script src="lib/moment/moment.js"></script>
+    <script src="lib/moment-timezone/moment-timezone.js"></script>
+    <script>
+
+        //Este bloque de código va a cargar los paises en el desplegable
+        fetch("/lib/countries/countries.json")
+            .then(response => response.json())
+            .then(countriesData => {
+                const selectCiudades = document.getElementById('countries');
+
+                Object.entries(countriesData).forEach(([codigo, nombre]) => {
+                    const option = document.createElement('option');
+                    option.value = codigo;
+                    option.textContent = nombre;
+                    selectCiudades.appendChild(option);
+                });
+            })
+
+
+        let opcionSeleccionada = "";
+        let country = "";
+        let updatedHour = "";
+
+        //Este bloque de código va a mostrar la opción elegida por el usuario
+        document.addEventListener("DOMContentLoaded", function () {
+            const selectCiudades = document.getElementById('countries');
+
+            selectCiudades.addEventListener('change', function () {
+                opcionSeleccionada = selectCiudades.value;
+                country = moment.tz.zonesForCountry(opcionSeleccionada)
+            });
+        });
+
+
+        let hours = document.getElementById('hours');
+        let minutes = document.getElementById('minutes');
+        let seconds = document.getElementById('seconds');
+        let extrahours = 0;
+
+        let relogio = setInterval(function time() {
+
+            let dataNow = new Date(); 
+
+            let hr = dataNow.getHours(); 
+            let mn = dataNow.getMinutes();
+            let sc = dataNow.getSeconds();
+
+            
+            if(country != ""){
+                updatedHour = moment().tz(country[0]);
+                hr = updatedHour.hours(); 
+                mn = updatedHour.minutes();
+                sc = updatedHour.seconds();
+            }
+
+            if (hr < 10) {
+                hr = '0' + hr;
+            }
+
+            if (mn < 10) {
+                mn = '0' + mn;
+            }
+
+            if (sc < 10) {
+                sc = '0' + sc;
+            }
+
+            hours.textContent = hr;
+            minutes.textContent = mn;
+            seconds.textContent = sc;
+        })
+
+
+    </script>
+</body>
+
+</html>
